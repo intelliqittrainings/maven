@@ -1,0 +1,83 @@
+pipeline
+
+{
+
+    agent any
+
+    stages
+
+    {
+
+        stage('ContinousDownload')
+
+        {
+
+            steps
+
+            {
+
+               git 'https://github.com/intelliqittrainings/maven.git' 
+
+            }
+
+        }
+
+        stage('ContinousBuild')
+
+        {
+
+            steps
+
+            {
+
+               sh label: '', script: 'mvn package'
+
+            }
+
+        }
+
+        stage('ContinousDeployment')
+
+        {
+
+            steps
+
+            {
+
+               sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.18.176:/var/lib/tomcat8/webapps/testapp.war'
+
+            }
+
+        }
+
+        stage('ContinousTesting')
+
+        {
+
+            steps
+
+            {
+
+                git 'https://github.com/selenium-saikrishna/FunctionalTesting.git'
+
+
+
+                sh label: '', script: 'echo "Testing Passed"'
+
+            }
+
+        }
+    }
+    post
+    {
+        success
+        {
+             sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.21.163:/var/lib/tomcat8/webapps/prodapp.war'
+        }
+        failure
+        {
+            mail bcc: '', body: 'Jenkins has failed to perform ci-cd', cc: 'gitadmin@gmail.com,testers@gmail.com,middleware@gmail.com', from: '', replyTo: '', subject: 'Jenkins job failed', to: 'developers@gmail.com'
+        }
+    }
+}
+
