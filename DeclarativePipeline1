@@ -3,42 +3,45 @@ pipeline
     agent any
     stages
     {
-        stage('ContinousDownload')
+        stage('ContinuousDownload')
         {
             steps
             {
-               git 'https://github.com/intelliqittrainings/maven.git' 
+                git 'https://github.com/intelliqittrainings/maven.git'
             }
         }
-        stage('ContinousBuild')
+        stage('ContinuousBuild')
         {
             steps
             {
-               sh label: '', script: 'mvn package'
+              sh label: '', script: 'mvn package'
+            }
+                
+        }
+        stage('ContinuousDeployment')
+        {
+            steps
+            {
+                sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.31.15:/var/lib/tomcat8/webapps/testwebapp.war'
+            }
+            
+        }
+        stage('ContinuousTesting')
+        {
+            steps
+            {
+                git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                sh label: '', script: 'java -jar /home/ubuntu/.jenkins/workspace/DeclarativePipeline/testing.jar'
             }
         }
-        stage('ContinousDeployment')
+        stage('ContinuousDelivery')
         {
-            steps
-            {
-               sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.18.176:/var/lib/tomcat8/webapps/testapp.war'
-            }
-        }
-        stage('ContinousTesting')
-        {
-            steps
-            {
-                git 'https://github.com/selenium-saikrishna/FunctionalTesting.git'
-
-                sh label: '', script: 'echo "Testing Passed"'
-            }
-        }
-         stage('ContinousDelivery')
-        {
-            steps
-            {
-              sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.21.163:/var/lib/tomcat8/webapps/prodapp.war'
-            }
+           steps
+           {
+               input message: 'Waiting for Approval from the DM!', submitter: 'naresh'
+               sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.26.41:/var/lib/tomcat8/webapps/prodwebapp.war'
+           }
         }
     }
+    
 }
