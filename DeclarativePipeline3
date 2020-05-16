@@ -1,83 +1,112 @@
 pipeline
-
 {
-
     agent any
-
     stages
-
     {
-
-        stage('ContinousDownload')
-
+        stage('ContinuousDownload')
         {
-
             steps
-
             {
-
-               git 'https://github.com/intelliqittrainings/maven.git' 
-
+                script
+                {
+                   try
+                   {
+                       git 'https://github.com/intelliqittrainings/maven.git'
+                   }
+                   catch(Exception e1)
+                   {
+                       mail bcc: '', body: 'Jenkins is unable to download from remote github', cc: '', from: '', replyTo: '', subject: 'Download failed', to: 'gitadmin@outlook.com'
+                       exit(1)
+                   }
+                }
+               
             }
-
         }
-
-        stage('ContinousBuild')
-
+         stage('ContinuousBuild')
         {
-
             steps
-
             {
-
-               sh label: '', script: 'mvn package'
-
+                script
+                {
+                   try
+                   {
+                       sh label: '', script: 'mvn package'
+                   }
+                   catch(Exception e2)
+                   {
+                       mail bcc: '', body: 'Jenkins is unable to create an artifact from the code', cc: '', from: '', replyTo: '', subject: 'Build failed', to: 'developers@outlook.com'
+                      exit(1)
+                   }
+                }
+               
             }
-
         }
-
-        stage('ContinousDeployment')
-
+        stage('ContinuousDeployment')
         {
-
             steps
-
             {
-
-               sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.18.176:/var/lib/tomcat8/webapps/testapp.war'
-
+                script
+                {
+                   try
+                   {
+                      sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.31.15:/var/lib/tomcat8/webapps/testwebapp.war'
+                   }
+                   catch(Exception e3)
+                   {
+                       mail bcc: '', body: 'Jenkins is unable to deploy into tomcat on the QaServers', cc: '', from: '', replyTo: '', subject: 'Deployment failed', to: 'middleware@outlook.com'
+                       exit(1)
+                   }
+                }
+                
             }
-
         }
-
-        stage('ContinousTesting')
-
+        stage('ContinuousTesting')
         {
-
             steps
-
             {
-
-                git 'https://github.com/selenium-saikrishna/FunctionalTesting.git'
-
-
-
-                sh label: '', script: 'echo "Testing Passed"'
-
+                script
+                {
+                                    
+                    try
+                    {
+                        git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                       sh label: '', script: 'java -jar /home/ubuntu/.jenkins/workspace/DeclarativePipeline/testing.jar'
+                    }
+                    catch(Exception e4)
+                    {
+                       mail bcc: '', body: 'Functional testing of the app on QAServers failed', cc: '', from: '', replyTo: '', subject: 'Testing failed', to: 'testers@outlook.com'
+                       exit(1)
+                    }
+                }
+                
             }
-
         }
+        stage('ContinuousDelivery')
+        {
+            steps
+            {
+                script
+                {
+                   try
+                   { 
+                        input message: 'Waiting for Approval!', submitter: 'naresh'
+                        sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.26.41:/var/lib/tomcat8/webapps/prodwebapp.war' 
+                    }
+                    catch(Exception e5)
+                    {
+                         mail bcc: '', body: 'Unable to deploy into ProdServers', cc: '', from: '', replyTo: '', subject: 'Delivery failed', to: 'delevery@outlook.com'
+                    }
+                }
+            }
+        }
+       
     }
-    post
-    {
-        success
-        {
-             sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.21.163:/var/lib/tomcat8/webapps/prodapp.war'
-        }
-        failure
-        {
-            mail bcc: '', body: 'Jenkins has failed to perform ci-cd', cc: 'gitadmin@gmail.com,testers@gmail.com,middleware@gmail.com', from: '', replyTo: '', subject: 'Jenkins job failed', to: 'developers@gmail.com'
-        }
-    }
+  
+       
+            
+    
+ 
+    
+    
+    
 }
-
