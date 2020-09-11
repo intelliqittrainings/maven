@@ -1,13 +1,3 @@
-pipeline
-{
-    agent any
-    stages
-    {
-        stage('ContinuousDownload')
-        {
-            steps
-            {
-                git 'https://github.com/intelliqittrainings/maven.git'
             }
         }
         stage('ContinuousBuild')
@@ -45,3 +35,4 @@ scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war
         }
     }
 }
+
