@@ -5,20 +5,20 @@ pipeline
     {
         stage('ContinuousDownload')
         {
-            steps
-            {
-                script
-                {
-                    try
-                    {
-                         git 'https://github.com/intelliqittrainings/maven.git'
-                    }
-                    catch(Exception e1)
-                    {
-                        mail bcc: '', body: 'Jenkins is unable to download the development code from the github', cc: '', from: '', replyTo: '', subject: 'Download failed', to: 'git.admin@gmail.com'
-                        exit(1)
-                    }
-                }
+        steps
+        {
+        script
+        {
+        try
+        {
+        git 'https://github.com/intelliqittrainings/maven.git'
+        }
+        catch(Exception e1)
+        {
+        mail bcc: '', body: 'Jenkins is unable to download the development code from the github', cc: '', from: '', replyTo: '', subject: 'Download failed', to: 'git.admin@gmail.com'
+        exit(1)
+        }
+        }
                
             }
         }
