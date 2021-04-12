@@ -10,8 +10,9 @@ node('master')
     }
     stage('ContinuousDeployment')
     {
-        deploy adapters: [tomcat9(credentialsId: '7d1a1f42-858a-4c50-93cb-b2919f4b059f', path: '', url: 'http://172.31.23.20:9090')], contextPath: 'testapp', war: '**/*.war'
+sh 'scp /home/ubuntu/.jenkins/workspace/ScriptedPipeline/webapp/target/webapp.war ubuntu@172.31.23.20:/var/lib/tomcat9/webapps/testapp.war'
     }
+
     stage('ContinuousTesting')
     {
         git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
@@ -19,6 +20,6 @@ node('master')
     }
     stage('ContinuousDelivery')
     {
-        deploy adapters: [tomcat9(credentialsId: '7d1a1f42-858a-4c50-93cb-b2919f4b059f', path: '', url: 'http://172.31.28.60:9090')], contextPath: 'prodapp', war: '**/*.war'
-    }
+    
+    sh 'scp /home/ubuntu/.jenkins/workspace/ScriptedPipeline/webapp/target/webapp.war ubuntu@172.31.28.60:/var/lib/tomcat9/webapps/prodapp.war'}
 }
