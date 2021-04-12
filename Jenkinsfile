@@ -1,29 +1,24 @@
-node('master')
+node('master') 
 {
-   stage('ContinuousDownload') 
-   {
-       git 'https://github.com/intelliqittrainings/maven.git'    
-   }
-   stage('ContinuousBuild')
-   {
-       sh 'mvn package'
-   }
-   stage('ContinuousDeployment')
-   {
-       sh 'scp /home/ubuntu/.jenkins/workspace/ScriptedPipeline1/webapp/target/webapp.war ubuntu@172.31.30.86:/var/lib/tomcat9/webapps/testapp.war'
-   }
-   stage('ContinuousTesting')
-   {
-       git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
-       sh 'java -jar /home/ubuntu/.jenkins/workspace/ScriptedPipeline1/testing.jar'
-       
-   }
-   stage('ContinuousDelivery')
-   {
-       sh 'scp /home/ubuntu/.jenkins/workspace/ScriptedPipeline1/webapp/target/webapp.war ubuntu@172.31.18.115:/var/lib/tomcat9/webapps/prodapp.war'
-      
-   }
-   
-   
-   
+    stage('ContinuousDownload')
+    {
+        git 'https://github.com/intelliqittrainings/maven.git'             
+    }
+    stage('ContinuousBuild')
+    {
+        sh 'mvn package'
+    }
+    stage('ContinuousDeployment')
+    {
+        deploy adapters: [tomcat9(credentialsId: '7d1a1f42-858a-4c50-93cb-b2919f4b059f', path: '', url: 'http://172.31.23.20:9090')], contextPath: 'testapp', war: '**/*.war'
+    }
+    stage('ContinuousTesting')
+    {
+        git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+        sh 'java -jar /home/ubuntu/.jenkins/workspace/ScriptedPipeline/testing.jar'
+    }
+    stage('ContinuousDelivery')
+    {
+        deploy adapters: [tomcat9(credentialsId: '7d1a1f42-858a-4c50-93cb-b2919f4b059f', path: '', url: 'http://172.31.28.60:9090')], contextPath: 'prodapp', war: '**/*.war'
+    }
 }
